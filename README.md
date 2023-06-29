@@ -1,4 +1,4 @@
-# JetEngine - break listing by yerms.
+# JetEngine - break listing by terms.
 
 Allow to break single listing grid into sections separated by terms. Something like this:
 
