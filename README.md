@@ -1,40 +1,41 @@
-# JetEngine - break listing by months.
+# JetEngine - break listing by yerms.
 
-Allow to break single listing grid into sections separated by month based on post publication date or date from the meta field. Something like this:
+Allow to break single listing grid into sections separated by terms. Something like this:
 
-![image](https://user-images.githubusercontent.com/4987981/172800275-70fae83f-b9c4-44cf-8f79-92ec4231f4a1.png)
+![image](https://github.com/ihslimn/jet-engine-break-listing-by-tax/assets/57287929/9b364f84-58af-45bb-971d-5c8a94eb4687)
 
 Plugin works only with Query Builder, so you can break only listings where you get the posts with Query Builder
 
-Also at the moment plugin works only with the Posts. But you can extend it by yourself for any object type you want (details in ths **Advanced** section)
-
-And last note - plugin doesn't sort posts by date itself, it only adding breaks based on comparison of posts dates. So you need to sort post by your self with Query settings
+And last note - plugin doesn't sort posts by terms itself, it only adding breaks based on comparison of posts terms. So you need to sort post by yourself with Query settings
 
 ## Setup
 - Download and intall plugin,
-- Define configuration constants in the end of functions.php file of your active theme,
-- Add 'break_months' into Query ID option of Query builder (may be changed with configuration constants):
-![image](https://user-images.githubusercontent.com/4987981/172801648-d3b6d752-4140-493e-ab88-d91833064f1b.png)
+- Add '--break-by-tax-TAXONOMY_SLUG' (e.g. '--break-by-tax-product_cat') into Query Name in Query builder:
+![image](https://github.com/ihslimn/jet-engine-break-listing-by-tax/assets/57287929/42611faa-ac35-405b-93e3-e689cd6305f6)
 
-**Note!** If you using Listing Grid in combination with JetSmartFilters, you need to set 'break_months' also as listing ID and filter query ID
+To sort posts by terms, use SQL query:
+```sql
+SELECT ID FROM {prefix}posts AS posts 
 
-Configuration example:
+INNER JOIN {prefix}term_relationships AS term_relationships 
+   ON posts.ID = term_relationships.object_id 
+INNER JOIN {prefix}term_taxonomy AS term_taxonomy 
+   ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id 
+INNER JOIN {prefix}terms AS terms 
+   ON term_taxonomy.term_id = terms.term_id  
 
-``` php
-  define( 'JET_ENGINE_BREAK_BY_FIELD', 'my_date_field' );
+WHERE term_taxonomy.taxonomy = 'product_cat' 
+
+ORDER BY terms.name ASC;
 ```
+
+Then, use Query Results macro to pull IDs to Post In in Posts Query
+![image](https://github.com/ihslimn/jet-engine-break-listing-by-tax/assets/57287929/b94084ad-368b-4be9-99ed-10da7d2096ff)
+and set order 'Preserve post ID order given in the \`Post In\` option'
+![image](https://github.com/ihslimn/jet-engine-break-listing-by-tax/assets/57287929/0b78066e-a0c3-45be-a9bd-6f476679dcd7)
+
 
 **Allowed constants:**
 
-- `JET_ENGINE_BREAK_BY_FIELD` - by default `false` - breaks posts by publication date. You can set any meta field key you want insted to break by meta field,
-- `JET_ENGINE_BREAK_BY_QUERY_ID` - by default 'break_months'. Trigger for breaking current listing
-- `JET_ENGINE_BREAK_MONTH_OPEN_HTML` - by default `<h4 class="jet-engine-break-listing" style="width:100%; flex: 0 0 100%;">` - opening HTML markup for month name. Please note - "style="width:100%; flex: 0 0 100%;" is important for multicolumn layout
-- `JET_ENGINE_BREAK_MONTH_CLOSE_HTML` - by default `</h4>` - closing HTML markup
-- `JET_ENGINE_BREAK_MONTH_FORMAT` - by default 'F, Y'. Date format string. Allowed merkup here - https://www.php.net/manual/en/datetime.format.php
-
-## Advanced
-
-To exted plugin functionality to any object you want, you need to rewrite getting data part - https://github.com/MjHead/jet-engine-break-listing-by-months/blob/master/jet-engine-break-listing-by-months.php#L99-L102
-
-- For CCT created date you can get with `$post->cct_created`, custom field accessible by its name - `$post->my_field`
-- For terms and users you need to use get_term_meta and get_user_meta functions
+- `JET_ENGINE_BREAK_TAX_OPEN_HTML` - by default `<h4 class="jet-engine-break-listing" style="width:100%; flex: 0 0 100%;">` - opening HTML markup for term name. Please note - "style="width:100%; flex: 0 0 100%;" is important for multicolumn layout
+- `JET_ENGINE_BREAK_TAX_CLOSE_HTML` - by default `</h4>` - closing HTML markup
